@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Inventory - SDLC Waterfall</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #2c3e50;
+        }
+        .sidebar .nav-link {
+            color: #ecf0f1;
+            padding: 15px 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        .sidebar .nav-link:hover {
+            background: #34495e;
+            color: #3498db;
+        }
+        .sidebar .nav-link.active {
+            background: #3498db;
+            color: white;
+        }
+        .stat-card {
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-warehouse"></i> Sistem Inventory - SDLC Waterfall
+            </a>
+            <div id="userInfo" class="navbar-text text-light" style="display: none;">
+                <i class="fas fa-user"></i> <span id="usernameDisplay">Admin</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-0">
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#" onclick="showSection('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('products')">
+                        <i class="fas fa-boxes"></i> Kelola Produk
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('stockIn')">
+                        <i class="fas fa-arrow-down"></i> Stock Masuk
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('stockOut')">
+                        <i class="fas fa-arrow-up"></i> Stock Keluar
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('reports')">
+                        <i class="fas fa-chart-bar"></i> Laporan
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('sdlc')">
+                        <i class="fas fa-project-diagram"></i> Dokumentasi SDLC
+                    </a>
+                    <a class="nav-link text-danger" href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <!-- Login Section -->
+                <div id="loginSection">
+                    <div class="row justify-content-center mt-5">
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <h3 class="text-center mb-4">Login System</h3>
+                                    <form id="loginForm">
+                                        <div class="mb-3">
+                                            <input type="text" id="loginUsername" class="form-control" placeholder="Username" value="admin" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="password" id="loginPassword" class="form-control" placeholder="Password" value="admin123" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                                    </form>
+                                    <div class="text-center mt-3">
+                                        <small class="text-muted">Default: admin / admin123</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Section -->
+                <div id="dashboardSection" style="display: none;">
+                    <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
+                    <div class="row mt-4">
+                        <div class="col-md-3 mb-4">
+                            <div class="card stat-card text-white bg-primary">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 id="totalProducts">0</h4>
+                                            <p>Total Produk</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-boxes fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card stat-card text-white bg-warning">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 id="lowStock">0</h4>
+                                            <p>Stock Menipis</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card stat-card text-white bg-success">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 id="totalStock">0</h4>
+                                            <p>Total Stock</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-cubes fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Aktivitas Terbaru</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="recentActivities">
+                                        <p class="text-muted">Belum ada aktivitas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div id="productsSection" style="display: none;">
+                    <h3><i class="fas fa-boxes"></i> Kelola Produk</h3>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Tambah Produk Baru</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="addProductForm">
+                                        <div class="mb-3">
+                                            <input type="text" id="productName" class="form-control" placeholder="Nama Produk" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="text" id="productSKU" class="form-control" placeholder="Kode SKU" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="number" id="productPrice" class="form-control" placeholder="Harga Jual" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="number" id="productStock" class="form-control" placeholder="Stock Awal" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="number" id="minStock" class="form-control" placeholder="Stock Minimum" value="5" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Tambah Produk</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Daftar Produk</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama Produk</th>
+                                                    <th>SKU</th>
+                                                    <th>Harga</th>
+                                                    <th>Stock</th>
+                                                    <th>Min Stock</th>
+                                                    <th>Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="productsTable">
+                                                <!-- Products will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock In Section -->
+                <div id="stockInSection" style="display: none;">
+                    <h3><i class="fas fa-arrow-down"></i> Stock Masuk</h3>
+                    
+                    <div class="row mt-4 justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Input Stock Masuk</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="stockInForm">
+                                        <div class="mb-3">
+                                            <label>Pilih Produk</label>
+                                            <select id="stockInProduct" class="form-control" required>
+                                                <option value="">-- Pilih Produk --</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>Jumlah</label>
+                                            <input type="number" id="stockInQty" class="form-control" placeholder="Jumlah stock masuk" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>Keterangan</label>
+                                            <input type="text" id="stockInNotes" class="form-control" placeholder="Keterangan (opsional)">
+                                        </div>
+                                        <button type="submit" class="btn btn-success w-100">Proses Stock Masuk</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Out Section -->
+                <div id="stockOutSection" style="display: none;">
+                    <h3><i class="fas fa-arrow-up"></i> Stock Keluar</h3>
+                    
+                    <div class="row mt-4 justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Input Stock Keluar</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="stockOutForm">
+                                        <div class="mb-3">
+                                            <label>Pilih Produk</label>
+                                            <select id="stockOutProduct" class="form-control" required>
+                                                <option value="">-- Pilih Produk --</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>Jumlah</label>
+                                            <input type="number" id="stockOutQty" class="form-control" placeholder="Jumlah stock keluar" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>Keterangan</label>
+                                            <input type="text" id="stockOutNotes" class="form-control" placeholder="Keterangan (opsional)">
+                                        </div>
+                                        <button type="submit" class="btn btn-danger w-100">Proses Stock Keluar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Section -->
+                <div id="reportsSection" style="display: none;">
+                    <h3><i class="fas fa-chart-bar"></i> Laporan</h3>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Laporan Stock</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama Produk</th>
+                                                    <th>SKU</th>
+                                                    <th>Harga</th>
+                                                    <th>Stock Saat Ini</th>
+                                                    <th>Stock Minimum</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="reportsTable">
+                                                <!-- Reports data will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button class="btn btn-primary mt-3" onclick="exportToPDF()">
+                                        <i class="fas fa-download"></i> Export PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SDLC Documentation Section -->
+                <div id="sdlcSection" style="display: none;">
+                    <h3><i class="fas fa-project-diagram"></i> Dokumentasi SDLC Waterfall</h3>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Fase SDLC Waterfall</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-2 mb-3">
+                                            <div class="card bg-primary text-white">
+                                                <div class="card-body">
+                                                    <h6>1. Requirements</h6>
+                                                    <small>Analisis Kebutuhan</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                            <div class="card bg-info text-white">
+                                                <div class="card-body">
+                                                    <h6>2. Design</h6>
+                                                    <small>Desain Sistem</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                            <div class="card bg-success text-white">
+                                                <div class="card-body">
+                                                    <h6>3. Implementation</h6>
+                                                    <small>Implementasi</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                            <div class="card bg-warning text-white">
+                                                <div class="card-body">
+                                                    <h6>4. Testing</h6>
+                                                    <small>Pengujian</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                            <div class="card bg-danger text-white">
+                                                <div class="card-body">
+                                                    <h6>5. Deployment</h6>
+                                                    <small>Implementasi</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                            <div class="card bg-secondary text-white">
+                                                <div class="card-body">
+                                                    <h6>6. Maintenance</h6>
+                                                    <small>Pemeliharaan</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <h6>📋 Requirement Analysis:</h6>
+                                        <ul>
+                                            <li>Manajemen Produk (CRUD)</li>
+                                            <li>Manajemen Stock (In/Out)</li>
+                                            <li>Laporan dan Analytics</li>
+                                            <li>Alert System</li>
+                                        </ul>
+
+                                        <h6>🎨 System Design:</h6>
+                                        <ul>
+                                            <li>Database: LocalStorage</li>
+                                            <li>Architecture: Single Page Application</li>
+                                            <li>UI Framework: Bootstrap 5</li>
+                                        </ul>
+
+                                        <h6>⚙️ Implementation:</h6>
+                                        <ul>
+                                            <li>Frontend: HTML, CSS, JavaScript</li>
+                                            <li>Data Storage: Browser LocalStorage</li>
+                                            <li>Responsive Design</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage using localStorage
+        const DB = {
+            products: JSON.parse(localStorage.getItem('products')) || [],
+            stockMovements: JSON.parse(localStorage.getItem('stockMovements')) || [],
+            users: [{ username: 'admin', password: 'admin123', name: 'Administrator' }],
+            
+            saveProducts() {
+                localStorage.setItem('products', JSON.stringify(this.products));
+            },
+            
+            saveStockMovements() {
+                localStorage.setItem('stockMovements', JSON.stringify(this.stockMovements));
+            },
+            
+            addProduct(product) {
+                product.id = Date.now();
+                product.createdAt = new Date().toISOString();
+                this.products.push(product);
+                this.saveProducts();
+                return product;
+            },
+            
+            updateProduct(id, updates) {
+                const index = this.products.findIndex(p => p.id == id);
+                if (index !== -1) {
+                    this.products[index] = { ...this.products[index], ...updates };
+                    this.saveProducts();
+                }
+            },
+            
+            deleteProduct(id) {
+                this.products = this.products.filter(p => p.id != id);
+                this.saveProducts();
+            },
+            
+            addStockMovement(movement) {
+                movement.id = Date.now();
+                movement.createdAt = new Date().toISOString();
+                this.stockMovements.unshift(movement);
+                this.saveStockMovements();
+                
+                // Update product stock
+                const product = this.products.find(p => p.id == movement.productId);
+                if (product) {
+                    if (movement.type === 'in') {
+                        product.currentStock += movement.quantity;
+                    } else {
+                        product.currentStock -= movement.quantity;
+                    }
+                    this.saveProducts();
+                }
+            },
+            
+            getRecentMovements(limit = 5) {
+                return this.stockMovements.slice(0, limit);
+            }
+        };
+
+        // Auth System
+        let currentUser = null;
+
+        function login(username, password) {
+            const user = DB.users.find(u => u.username === username && u.password === password);
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showApp();
+                loadDashboard();
+                return true;
+            }
+            return false;
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showLogin();
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        function showApp() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('usernameDisplay').textContent = currentUser.name;
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = ['dashboard', 'products', 'stockIn', 'stockOut', 'reports', 'sdlc'];
+            sections.forEach(section => {
+                document.getElementById(section + 'Section').style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + 'Section').style.display = 'block';
+            
+            // Load section data
+            if (sectionName === 'dashboard') loadDashboard();
+            if (sectionName === 'products') loadProducts();
+            if (sectionName === 'stockIn') loadStockIn();
+            if (sectionName === 'stockOut') loadStockOut();
+            if (sectionName === 'reports') loadReports();
+        }
+
+        // Dashboard Functions
+        function loadDashboard() {
+            const totalProducts = DB.products.length;
+            const lowStock = DB.products.filter(p => p.currentStock <= p.minStock).length;
+            const totalStock = DB.products.reduce((sum, p) => sum + p.currentStock, 0);
+            
+            document.getElementById('totalProducts').textContent = totalProducts;
+            document.getElementById('lowStock').textContent = lowStock;
+            document.getElementById('totalStock').textContent = totalStock;
+            
+            // Load recent activities
+            const recentActivities = DB.getRecentMovements();
+            const activitiesHtml = recentActivities.length > 0 
+                ? recentActivities.map(movement => {
+                    const product = DB.products.find(p => p.id == movement.productId);
+                    const typeBadge = movement.type === 'in' 
+                        ? '<span class="badge bg-success">MASUK</span>'
+                        : '<span class="badge bg-danger">KELUAR</span>';
+                    return `
+                        <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                            <div>
+                                <strong>${product ? product.name : 'Unknown'}</strong>
+                                ${typeBadge}
+                                <br>
+                                <small class="text-muted">${movement.quantity} unit - ${movement.notes || 'No notes'}</small>
+                            </div>
+                            <small class="text-muted">${new Date(movement.createdAt).toLocaleDateString()}</small>
+                        </div>
+                    `;
+                }).join('')
+                : '<p class="text-muted">Belum ada aktivitas</p>';
+            
+            document.getElementById('recentActivities').innerHTML = activitiesHtml;
+        }
+
+        // Products Functions
+        function loadProducts() {
+            const productsTable = document.getElementById('productsTable');
+            productsTable.innerHTML = DB.products.map(product => `
+                <tr>
+                    <td>${product.name}</td>
+                    <td>${product.sku}</td>
+                    <td>Rp ${product.price.toLocaleString()}</td>
+                    <td>
+                        <span class="${product.currentStock <= product.minStock ? 'text-danger fw-bold' : ''}">
+                            ${product.currentStock}
+                        </span>
+                    </td>
+                    <td>${product.minStock}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="6" class="text-center">Tidak ada produk</td></tr>';
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Hapus produk ini?')) {
+                DB.deleteProduct(id);
+                loadProducts();
+                loadDashboard();
+            }
+        }
+
+        // Stock Functions
+        function loadStockIn() {
+            const select = document.getElementById('stockInProduct');
+            select.innerHTML = '<option value="">-- Pilih Produk --</option>' +
+                DB.products.map(product => `
+                    <option value="${product.id}">${product.name} (Stock: ${product.currentStock})</option>
+                `).join('');
+        }
+
+        function loadStockOut() {
+            const select = document.getElementById('stockOutProduct');
+            select.innerHTML = '<option value="">-- Pilih Produk --</option>' +
+                DB.products.map(product => `
+                    <option value="${product.id}">${product.name} (Stock: ${product.currentStock})</option>
+                `).join('');
+        }
+
+        // Reports Functions
+        function loadReports() {
+            const reportsTable = document.getElementById('reportsTable');
+            reportsTable.innerHTML = DB.products.map(product => {
+                const status = product.currentStock <= product.minStock 
+                    ? '<span class="badge bg-danger">STOCK MENIPIS</span>'
+                    : '<span class="badge bg-success">AMAN</span>';
+                
+                return `
+                    <tr>
+                        <td>${product.name}</td>
+                        <td>${product.sku}</td>
+                        <td>Rp ${product.price.toLocaleString()}</td>
+                        <td>${product.currentStock}</td>
+                        <td>${product.minStock}</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="6" class="text-center">Tidak ada data</td></tr>';
+        }
+
+        function exportToPDF() {
+            alert('Fitur export PDF akan diimplementasi menggunakan library seperti jsPDF');
+            // In real implementation, use jsPDF library to generate PDF
+        }
+
+        // Event Listeners
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (login(username, password)) {
+                alert('Login berhasil!');
+            } else {
+                alert('Login gagal! Cek username dan password.');
+            }
+        });
+
+        document.getElementById('addProductForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const product = {
+                name: document.getElementById('productName').value,
+                sku: document.getElementById('productSKU').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                currentStock: parseInt(document.getElementById('productStock').value),
+                minStock: parseInt(document.getElementById('minStock').value)
+            };
+            
+            DB.addProduct(product);
+            this.reset();
+            loadProducts();
+            loadDashboard();
+            alert('Produk berhasil ditambahkan!');
+        });
+
+        document.getElementById('stockInForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const movement = {
+                productId: parseInt(document.getElementById('stockInProduct').value),
+                type: 'in',
+                quantity: parseInt(document.getElementById('stockInQty').value),
+                notes: document.getElementById('stockInNotes').value,
+                user: currentUser.name
+            };
+            
+            DB.addStockMovement(movement);
+            this.reset();
+            loadDashboard();
+            alert('Stock masuk berhasil dicatat!');
+        });
+
+        document.getElementById('stockOutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = parseInt(document.getElementById('stockOutProduct').value);
+            const quantity = parseInt(document.getElementById('stockOutQty').value);
+            const product = DB.products.find(p => p.id === productId);
+            
+            if (product.currentStock < quantity) {
+                alert('Stock tidak mencukupi!');
+                return;
+            }
+            
+            const movement = {
+                productId: productId,
+                type: 'out',
+                quantity: quantity,
+                notes: document.getElementById('stockOutNotes').value,
+                user: currentUser.name
+            };
+            
+            DB.addStockMovement(movement);
+            this.reset();
+            loadDashboard();
+            alert('Stock keluar berhasil dicatat!');
+        });
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showApp();
+                loadDashboard();
+            } else {
+                showLogin();
+            }
+            
+            // Add some sample data if empty
+            if (DB.products.length === 0) {
+                DB.addProduct({
+                    name: 'Laptop ASUS X441',
+                    sku: 'LP-001',
+                    price: 6500000,
+                    currentStock: 5,
+                    minStock: 2
+                });
+                DB.addProduct({
+                    name: 'Mouse Wireless',
+                    sku: 'MS-001',
+                    price: 75000,
+                    currentStock: 15,
+                    minStock: 10
+                });
+            }
+        });
+    </script>
+</body>
+                      </html>
